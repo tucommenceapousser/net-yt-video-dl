@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Youtube Downloader by trhacknon</title>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+			integrity="sha512-2LLfVi9X/ZL7j/hZSg4wJ0DdMZzBa6yJY0yktz6m0p6O9JPOhEmr6rDz6lL+6U5o0QvNY8IdyR+1ZWaM9eNqw=="
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+			integrity="sha384-fCFlBkEjivcw/c9r+NvU6Ghvh6It5f6IR5Uc4l1Y4y4Jf/TQlvoX9wpOx+rdK9gW"
+			crossorigin="anonymous"
+		/>
+	</head>
+	<body>
+		<div id="app">
+			<div class="container my-5 animate__animated animate__fadeIn">
+				<h1><strong>Youtube Downloader by trhacknon</strong></h1>
+				<div class="my-5">
+					<div class="input-group">
+						<input
+							type="text"
+							class="form-control"
+							placeholder="Enter Video URL"
+							v-model="url"
+							@keyup.enter="downloadVideo"
+						/>
+						<button
+							class="btn btn-primary"
+							@click="downloadVideo"
+							:disabled="downloading"
+						>
+							<span v-if="!downloading">Download</span>
+							<span v-else class="spinner-border spinner-border-sm"></span>
+						</button>
+					</div>
+					<small class="text-danger">{{ error }}</small>
+				</div>
+				<div class="my-5" v-if="downloaded">
+					<a :href="downloaded" download>
+						<button class="btn btn-success">Downloaded! Click to download</button>
+					</a>
+				</div>
+			</div>
+		</div>
+		<script src="https://unpkg.com/vue@3.2.31/dist/vue.global.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+		<script>
+			const app = Vue.createApp({
+				data() {
+					return {
+						url: "",
+						downloading: false,
+						downloaded: "",
+						error: "",
+					};
+				},
+				methods: {
+					downloadVideo() {
+						this.downloading = true;
+						axios
+							.get(`/download?url=${this.url}`)
+							.then((response) => {
+								this.downloading = false;
+								if (response.data.success) {
+									this.downloaded = response.data.filepath;
+									this.error = "";
+								} else {
+									this.downloaded = "";
+									this.error = response.data.message;
+								}
+							})
+							.catch((error) => {
+								this.downloading = false;
+								this.downloaded = "";
+								this.error = "Error: " + error.message;
+							});
+					},
+				},
+			});
+			app.mount("#app");
+		</script>
+	</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Messages du bot Telegram</title>
+  </head>
+  <body>
+    <h1>Messages du bot Telegram</h1>
+    <% if (messages.length === 0) { %>
+      <p>Aucun message n'a été envoyé par le bot pour le moment.</p>
+    <% } else { %>
+      <ul>
+        <% messages.forEach(function(message) { %>
+          <li><%= message.text %> - envoyé par <%= message.sender %> le <%= message.timestamp %></li>
+        <% }); %>
+      </ul>
+    <% } %>
+  </body>
+</html>

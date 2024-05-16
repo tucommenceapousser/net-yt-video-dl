@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Messages du bot Telegram</title>
+  </head>
+  <body>
+    <h1>Messages du bot Telegram</h1>
+    <% if (messages.length === 0) { %>
+      <p>Aucun message n'a été envoyé par le bot pour le moment.</p>
+    <% } else { %>
+      <ul>
+<!-- Loop through the messages and display them -->
+<% messages.forEach(function(message) { %>
+  <p>envoyé par le <%= message.sender %> : <%= message.text %></p>
+<% }) %>
+  </ul>
+    <% } %>
+      <ul>
+  <% for (var i = 0; i < messages.length; i++) { %>
+    <li><%= messages[i] %></li>
+  <% } %>
+</ul>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  socket.on('new message', (message) => {
+    // Update the UI with the new message
+    const messageElement = document.createElement('li');
+    messageElement.textContent = message;
+    document.getElementById('messages').appendChild(messageElement);
+  });
+</script>
+
+  </body>
+</html>

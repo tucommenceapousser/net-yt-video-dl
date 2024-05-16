@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>YouTube Downloader</title>
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+			integrity="sha384-Hc2m0R7E+OoWeWQz9wMIZuHvI795pF3t8E3M1EStAabgV7fNEbLW8jUew+2m1JoJ"
+			crossorigin="anonymous">
+		<!-- Animate.css -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+		<!-- Custom CSS -->
+		<link rel="stylesheet" href="/public/style.css" />
+	</head>
+	<body>
+		<div class="container">
+			<div class="row justify-content-center mt-5">
+				<div class="col-12 col-md-8 col-lg-6">
+					<div class="card">
+						<div class="card-header bg-primary text-white text-center">
+							<h3 class="card-title mb-0">YouTube Downloader</h3>
+						</div>
+						<div class="card-body">
+							<form id="download-form">
+								<div class="form-group">
+									<label for="video-link">Enter YouTube Video Link</label>
+									<input type="text" class="form-control" id="video-link" required />
+								</div>
+								<button type="submit" class="btn btn-primary btn-block">
+									<i class="fas fa-download"></i> Download
+								</button>
+								<div class="text-center mt-3">
+									<div class="spinner-border text-primary d-none" role="status" id="spinner">
+										<span class="sr-only">Loading...</span>
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="card-footer">
+							<div class="text-center">
+								<small class="text-muted">
+									Made with <i class="fas fa-heart text-danger"></i> by trhacknon
+								</small>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Vue.js & Axios -->
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+		<!-- Bootstrap JS -->
+		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+			integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+			crossorigin="anonymous"></script>
+
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+			integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+			integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
+			crossorigin="anonymous"
+		/>
+		<script
+			src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+			integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+			integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+			integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+			crossorigin="anonymous"
+		></script>
+	</head>
+	<body>
+		<div class="container">
+			<iframe class="d-flex" width="640" height="480" src="<%= url %>">
+			</iframe>
+		</div>
+		<div class="container">
+			<div class="btn-group">
+				<button
+					type="button"
+					class="btn btn-success dropdown-toggle"
+					data-toggle="dropdown"
+					aria-haspopup="true"
+					aria-expanded="false"
+				>
+					Download
+				</button>
+				<div class="dropdown-menu">
+					<% info.forEach((format) => { %>
+					<a class="dropdown-item" href="<%= format.url %>">
+						<%= format.mimeType.split(";")[0] %> <%= format.hasVideo
+						? format.height + "p" : "" %> <% if(!format.hasAudio) {
+						%>
+						<i class="fas fa-volume-mute text-danger"></i>
+						<% } %>
+					</a>
+					<% }); %>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

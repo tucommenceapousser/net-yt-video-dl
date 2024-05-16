@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download Options for the link</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+      integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+      integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
+      crossorigin="anonymous"
+    />
+    <style>
+      /* Add some styles to the dropdown button */
+      .btn-success {
+        position: relative;
+      }
+
+      /* Add a triangle icon to the dropdown button */
+      .btn-success::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        margin-top: -3px;
+        border-width: 6px 6px 0 6px;
+        border-color: #fff transparent transparent transparent;
+        border-style: solid;
+      }
+
+      /* Add a fade-in effect to the dropdown menu */
+      .dropdown-menu {
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+      }
+
+      .dropdown-menu.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Add a rotation effect to the mute icon */
+      .fa-volume-mute {
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .fa-volume-mute:hover {
+        transform: rotate(180deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <iframe class="d-flex" width="640" height="480" src="<%= url %>"></iframe>
+    </div>
+    <div class="container">
+      <div class="btn-group">
+        <button
+          type="button"
+          class="btn btn-success dropdown-toggle"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          Download
+        </button>
+        <div class="dropdown-menu">
+          <% info.forEach((format) => { %>
+          <a class="dropdown-item" href="<%= format.url %>">
+            <%= format.mimeType.split(";")[0] %> <%= format.hasVideo
+            ? format.height + "p" : "" %> <% if(!format.hasAudio) {
+            %>
+            <i class="fas fa-volume-mute text-danger"></i>
+            <% } %>
+          </a>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.querySelectorAll('.fa-volume-mute').forEach((icon) => {
+        icon.addEventListener('click', () => {
+          icon.classList.toggle('text-danger');
+        });
+      });
+    </script>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
+      integrity="sha384-OMW2yT1z6sb9Sz7T9P+U8VfydTRkdEJ1j7UvTq+P3j5tO8T9E68JzR0pHXlnaT2l"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.3/dist/umd/popper.min.js"
+      integrity="sha384-NnFz9wjQ2HdKjx1Zn+gZMLpLZwItD11yWNBqK4voYwx28ofzN/AJ/8RmQ2KjOrVA"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"
+      integrity="sha384-z7gFvY5e5mqIzdfM6aOo6g41WO6UjHw1uyrqY5H5z5D8g92WJ7+hjIcQ2w7GIZru"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

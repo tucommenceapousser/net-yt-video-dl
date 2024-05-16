@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Messages du bot Telegram</title>
+    		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+			integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+			crossorigin="anonymous"
+		/><style>
+  body {
+    background-image: url('https://i.top4top.io/p_2395dyz711.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    color: #ff0000;
+    text-align: center;
+    margin-top: 50px;
+    text-shadow: 2px 2px 5px #000;
+}
+
+.btn {
+    background-color: #ff0000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-image: url('https://i.top4top.io/p_2395dyz711.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.btn:hover {
+    transform: scale(1.1);
+}
+
+h1 span {
+    display: inline-block;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+/* Style pour le titre */
+
+/* Style pour le paragraphe */
+p {
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 20px 0;
+}
+
+/* Style pour la liste de messages */
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Style pour chaque message */
+li {
+  font-size: 16px;
+  line-height: 1.2;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #ecf0f1;
+  border-radius: 10px;
+}
+
+/* Style pour le formulaire */
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+}
+
+input[type="text"] {
+  font-size: 16px;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  width: 300px;
+}
+
+button[type="submit"] {
+  font-size: 16px;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  background-color: #2c3e50;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button[type="submit"]:hover {
+  background-color: #34495e;
+}
+
+</style>
+
+  </head>
+  <body>
+    <h1>Messages du bot Telegram</h1>
+    <% if (messages.length === 0) { %>
+  <font color="lime">    <p>Aucun message n'a été envoyé par le bot pour le moment.</p></font>
+    <% } else { %>
+      <ul>
+<!-- Loop through the messages and display them -->
+<% messages.forEach(function(message) { %>
+ <font color="red"> <p>envoyé par le <%= message.sender %> : <%= message.text %></p>
+<% }) %>
+  </ul>
+    <% } %>
+      <ul>
+  <% for (var i = 0; i < messages.length; i++) { %>
+    <li><%= messages[i] %></li></font>
+  <% } %>
+</ul>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  socket.on('new message', (message) => {
+    // Update the UI with the new message
+    const messageElement = document.createElement('li');
+    messageElement.textContent = message;
+    document.getElementById('messages').appendChild(messageElement);
+  });
+</script>
+
+  </body>
+</html>

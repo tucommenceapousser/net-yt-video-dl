@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Youtube Downloader by trhacknon</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+			integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+			crossorigin="anonymous"
+		/><style>
+  body {
+    background-color: #f8f9fa;
+    font-family: Arial, sans-serif;
+  }
+
+  h1 {
+    color: #007bff;
+    text-align: center;
+    margin-top: 50px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    font-weight: bold;
+    color: #343a40;
+  }
+
+  input[type="text"] {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 10px;
+    width: 100%;
+  }
+
+  button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #0069d9;
+  }
+</style>
+
+	</head>
+	<body>
+		<div class="container my-5">
+			<h1><strong>Youtube Downloader by trhacknon</strong></h1>
+			<form method="GET" action='/download' class="my-5">
+				<div class="form-group">
+					<label for="exampleInputEmail1"
+						>Video Link from Youtube</label
+					>
+					<input
+						type="text"
+						class="form-control"
+						placeholder="Enter Video URL"
+                        name="url"
+					/>
+				</div>
+				<button type="submit" class="btn btn-primary">Download</button>
+			</form>
+		</div><script>
+  // Animer le titre h1
+  const title = document.querySelector('h1');
+  title.addEventListener('mouseover', () => {
+    title.style.color = '#ff0000';
+  });
+  title.addEventListener('mouseout', () => {
+    title.style.color = '#007bff';
+  });
+
+  // Animer le bouton Download
+  const button = document.querySelector('button');
+  button.addEventListener('click', () => {
+    button.style.backgroundColor = '#28a745';
+    button.textContent = 'Downloading...';
+    setTimeout(() => {
+      button.style.backgroundColor = '#007bff';
+      button.textContent = 'Download';
+    }, 3000);
+  });
+</script>
+
+	</body>
+</html>

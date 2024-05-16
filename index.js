@@ -1,28 +1,320 @@
+const TelegramBot = require('node-telegram-bot-api');
 const express = require("express");
+const bodyParser = require("body-parser");
+const http = require("http");
 const app = express();
 const ytdl = require("ytdl-core");
+const TOKEN = process.env['TOKEN'];
+const bot = new TelegramBot(TOKEN, { polling: true });
+const server = http.createServer(app);
+const io = require('socket.io')(server);
+const axios = require('axios');
+const fs = require('fs');
+const ytpl = require("ytpl");
+
+const messages = [];
+
+io.on('connection', (socket) => {
+  console.log('User connected');
+
+  const botMessages = messages
+    .slice(-5)
+    .map(m => m.text)
+    .reverse();
+  socket.emit('messages', botMessages);
+});
 
 app.set("view engine", "ejs");
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(express.static('static'));
 
-app.get("/", (req, res) => {
-	return res.render("index");
+app.get('/greeting', (req, res) => {
+  const name = req.query.name || 'stranger';
+  const greeting = `Hello, ${name}! Welcome to My Youtube Downloader.`;
+
+  // Show notification using SweetAlert2
+  const Swal = require('sweetalert2');
+  Swal.fire({
+    icon: 'success',
+    title: greeting,
+    showConfirmButton: false,
+    timer: 3000
+  });
+
+  res.json({ greeting });
 });
+
+
+
+app.get("/messages", function(req, res) {
+  const senderId = parseInt(req.query.from);
+  const userMessages = messages
+    .filter(m => m.sender === senderId)
+    .slice(-5)
+    .map(m => {
+      const senderName = userNames[m.sender] || `Utilisateur ${m.sender}`;
+      const time = new Date(m.timestamp).toLocaleTimeString();
+      return {
+        sender: m.sender,
+        senderName: senderName,
+        text: m.text,
+        time: time
+      };
+    })
+    .reverse();
+  res.render("home", { messages: userMessages });
+});
+
+
+app.get('/', (req, res) => {
+  res.render('index'); // Rendre le template index.ejs
+});
+
+app.get("/home", function(req, res) {
+  const allMessages = messages
+    .slice(-5)
+    .map(m => m.text)
+    .reverse();
+  res.render("home", { messages: allMessages });
+});
+
 
 app.get("/download", async(req, res) => {
-	const v_id = req.query.url.split('v=')[1];
-    const info = await ytdl.getInfo(req.query.url);
-    console.log(info.formats[4]);
-    console.log(info.formats[1]);
+  const v_id = req.query.url.split('v=')[1];
+  const info = await ytdl.getInfo(req.query.url);
+  console.log(info.formats[4]);
+  console.log(info.formats[1]);
 
-	return res.render("download", {
-		url: "https://www.youtube.com/embed/" + v_id,
-        info: info.formats.sort((a, b) => {
-            return a.mimeType < b.mimeType;
-        }),
-	});
+  return res.render("download", {
+    url: "https://www.youtube.com/embed/" + v_id,
+    info: info.formats.sort((a, b) => {
+      return a.mimeType < b.mimeType;
+    }),
+  });
+});
+
+// Listen for /youtube command to handle video and playlist downloading
+bot.onText(/\/youtube (.+)/, async (msg, match) => {
+    const chatId = msg.chat.id;
+    const url = match[1];
+
+    try {
+        if (url.includes('list=')) {
+            const playlist = await ytpl(url);
+
+            // Process playlist items
+            const playlistInfo = playlist.items.map(item => {
+                const v_id = item.id;
+                return {
+                    url: `https://www.youtube.com/embed/${v_id}`,
+                    title: item.title,
+                };
+            });
+
+            // Send playlist info to the user
+            playlistInfo.forEach(item => {
+                bot.sendMessage(chatId, `Title: ${item.title}\nURL: ${item.url}`);
+            });
+        } else {
+            // Process single video
+            const info = await ytdl.getInfo(url);
+            const formats = info.formats.sort((a, b) => {
+                return a.mimeType < b.mimeType;
+            });
+
+            bot.sendMessage(chatId, `Quel format voulez-vous pour ${info.title}?`, {
+                reply_markup: {
+                    inline_keyboard: formats.slice(0, 5).map(format => ([{
+                        text: format.mimeType,
+                        callback_data: JSON.stringify({
+                            url: url,
+                            format: format.itag
+                        })
+                    }]))
+                }
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        bot.sendMessage(chatId, "Une erreur est survenue lors du traitement de la commande.");
+    }
+});
+
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, "Bienvenue ! Utilisez /help pour voir la liste des commandes disponibles :\n" +
+        "ce bot est la propriete de TRHACKNON\n");
+});
+
+bot.onText(/\/tuto/, (msg) => {
+    const chatId = msg.chat.id;
+    const message = "Bienvenue sur mon bot de téléchargement de vidéos YouTube. Pour télécharger une vidéo, il vous suffit de m'envoyer la commande /youtube suivi d.un lien YouTube. Je prends en charge différents formats tels que MP4, WebM, 3GP et plus encore. Pour commencer, envoyez-moi un lien YouTube!";
+    bot.sendMessage(chatId, message);
+});
+
+// Afficher une liste de commandes disponibles pour l'utilisateur
+bot.onText(/\/help/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, "Voici la liste des commandes disponibles :\n" +
+        "/help - affiche la liste des commandes\n" +
+        "/fetch - affiche les cinq derniers messages envoyés par l'utilisateur\n" + "/tuto - tutorial for video download\n" +
+        "/wp - receive a wordpress link and login and password\n" + "/cpanel - receive a cpanel link and login and password\n" +
+        "/pic - envoie une photo\n" +
+        "/video - envoie une vidéo\n" +
+        "/audio - envoie un fichier audio\n" +
+        "/who - affiche un message personnalisé\n" +
+        "/youtube - download youtube video exemple : https://m.youtube.com/watch?v=ydQoelT6AhM");
+});
+
+// Afficher les cinq derniers messages envoyés par l'utilisateur
+
+// Handle incoming messages from the bot
+bot.on('message', (msg) => {
+  // Store the message in the messages array
+  messages.push({
+    text: msg.text,
+    sender: msg.from.id,
+    timestamp: msg.date
+  });
+
+  // Keep only the last 100 messages
+  if (messages.length > 100) {
+    messages.splice(0, messages.length - 100);
+  }
+
+  // Emit the new message to all clients via a socket
+  io.emit('botMessage', {
+    text: msg.text,
+    sender: msg.from.id,
+    timestamp: msg.date
+  });
+
+// Send the message content to the server
+const messageContent = msg.text;
+if (messageContent) {
+  const requestOptions = {
+    headers: { 'Content-Type': 'application/json' },
+  };
+  axios.post('http://localhost:3000/messages', { messageContent }, requestOptions)
+    .then(response => {
+      const contentType = response.headers['content-type'];
+      if (contentType && contentType.indexOf('application/json') !== -1) {
+        return response.data;
+      } else {
+        return response.text();
+      }
+    })
+    .catch(error => console.log(error));
+}
+
+});
+
+// Define a new route to handle incoming messages
+app.post('/messages', (req, res) => {
+  const messageContent = req.body.messageContent;
+  console.log(`Message received: ${messageContent}`);
+  res.json({ status: 'OK' }); // Send a JSON response
 });
 
 
+
+
+// Handle the /fetch command
+bot.onText(/\/fetch/, (msg) => {
+  const chatId = msg.chat.id;
+  const userMessages = messages
+    .filter(m => m.sender === msg.from.id)
+    .slice(-5)
+    .map(m => m.text)
+    .reverse();
+
+  bot.sendMessage(chatId, "Here are your last five messages:\n" + userMessages.join("\n"));
+});
+
+
+// Envoyer une photo
+bot.onText(/\/pic/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendPhoto(chatId, './uk.jpg');
+});
+
+// Envoyer une vidéo
+bot.onText(/\/video/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendVideo(chatId, './uk.mp4');
+});
+
+const wpLines = fs.readFileSync('wp.txt', 'utf-8').split('\n');
+
+// Définition de la commande /wp-hack
+bot.onText(/\/wp/, (msg) => {
+  const chatId = msg.chat.id;
+  // Envoi d'une ligne aléatoire du fichier wp.txt
+  bot.sendMessage(chatId, wpLines[Math.floor(Math.random() * wpLines.length)]);
+});
+// Envoyer un fichier audio
+bot.onText(/\/audio/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendAudio(chatId, './uk.mp3');
+});
+
+bot.onText(/\/cpanel/, (msg) => {
+    const chatId = msg.chat.id;
+
+    fs.readFile('cpanel.txt', 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            bot.sendMessage(chatId, 'Une erreur est survenue lors de la lecture du fichier.');
+        } else {
+            const lines = data.split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) {
+                bot.sendMessage(chatId, 'Le fichier est vide.');
+            } else {
+                const randomIndex = Math.floor(Math.random() * lines.length);
+                bot.sendMessage(chatId, lines[randomIndex]);
+            }
+        }
+    });
+});
+
+// Afficher un message personnalisé
+bot.onText(/\/who/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, "im trhacknon anonymous hacker rainbow hat");
+});
+
+
+// Gérer la sélection de format de fichier par l'utilisateur
+bot.on('callback_query', async (callbackQuery) => {
+    const chatId = callbackQuery.message.chat.id;
+    const data = JSON.parse(callbackQuery.data);
+    const info = await ytdl.getInfo(data.url);
+    const format = info.formats.find(f => f.itag === data.format);
+    const videoReadableStream = ytdl.downloadFromInfo(info, {
+        format: format
+    });
+
+    // Enregistrer la vidéo sur le disque
+    const videoPath = `./${info.title}.mp4`;
+    videoReadableStream.pipe(fs.createWriteStream(videoPath));
+
+    // Attendre que la vidéo soit complètement enregistrée avant de l'envoyer sur Telegram
+    videoReadableStream.on('end', () => {
+        // Envoyer la vidéo au chat Telegram
+        bot.sendVideo(chatId, videoPath, {
+            caption: info.title,
+            duration: info.length_seconds,
+            thumb: info.thumbnail_url
+        }, {
+            reply_markup: {
+                remove_keyboard: true
+            }
+        });
+    });
+});
+
+// Lancer le serveur express
 app.listen(3000, () => {
-	console.log("Server is running on http://localhost:3000");
+    console.log("Server is running on http://localhost:3000");
 });
